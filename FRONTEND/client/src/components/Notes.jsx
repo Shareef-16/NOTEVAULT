@@ -5,10 +5,13 @@ import Profile from './Profile';
 
 function Notes() {
     const navigate = useNavigate();
-    const [title, setTitle] = useState("");
-    const [content, setContent] = useState("");
-    const [msg, setMessage] = useState("");
-    const [data, setData] = useState([]);
+   const [title, setTitle] = useState("");
+const [content, setContent] = useState("");
+const [msg, setMessage] = useState("");
+const [data, setData] = useState([]);
+
+const [search, setSearch] = useState("");
+const [searchMode, setSearchMode] = useState(false);
 
     useEffect(() => {
         const token = localStorage.getItem("token");
@@ -34,7 +37,32 @@ function Notes() {
             navigate("/login");
         }
     }
+    async function searchNotes() {
+    const token = localStorage.getItem("token");
 
+    try {
+        if (search.trim() === "") {
+            setSearchMode(false);
+            getNotes();
+            return;
+        }
+
+        const res = await axios.get(
+            `http://localhost:8000/notes/search?q=${search}`,
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            }
+        );
+
+        setSearchMode(true);
+        setData(res.data.notes);
+
+    } catch (err) {
+        console.log(err);
+    }
+}
     async function addNote(e) {
         e.preventDefault();
         const token = localStorage.getItem("token");
@@ -139,8 +167,42 @@ function Notes() {
                     Add note
                 </button>
             </div>
-
+    
             <h4>{msg}</h4>
+            <div
+    style={{
+        display: "flex",
+        gap: "10px",
+        marginTop: "20px",
+        marginBottom: "20px"
+    }}
+>
+    <input
+        type="text"
+        placeholder="🔍 Search notes..."
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+        style={{
+            flex: 1,
+            padding: "12px",
+            borderRadius: "8px"
+        }}
+    />
+
+    <button onClick={searchNotes}>
+        Search
+    </button>
+
+    <button
+        onClick={() => {
+            setSearch("");
+            setSearchMode(false);
+            getNotes();
+        }}
+    >
+        Clear
+    </button>
+</div>
 
             <div className="notes-grid">
                 {data.map(note => (

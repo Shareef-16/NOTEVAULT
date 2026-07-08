@@ -187,6 +187,35 @@ app.get("/notes", auth, async (req, res) => {
         res.status(500).json({ message: "Server error" });
     }
 })
+// Search notes
+app.get("/notes/search", auth, async (req, res) => {
+    try {
+        const keyword = req.query.q || "";
+
+        const notes = await notemodel.find({
+            userId: req.userId,
+            $or: [
+                {
+                    title: {
+                        $regex: keyword,
+                        $options: "i"
+                    }
+                },
+                {
+                    content: {
+                        $regex: keyword,
+                        $options: "i"
+                    }
+                }
+            ]
+        }).sort({ createdAt: -1 });
+
+        return res.json({ notes });
+
+    } catch (err) {
+        res.status(500).json({ message: "Server error" });
+    }
+});
 
 
 // To delete note
