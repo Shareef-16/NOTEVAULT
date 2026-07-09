@@ -1,0 +1,38 @@
+trigger:
+- main
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+steps:
+
+# Install Node.js
+- task: NodeTool@0
+  inputs:
+    versionSpec: '22.x'
+  displayName: 'Install Node.js'
+
+# Install Backend Dependencies
+- script: |
+    cd BACKEND
+    npm install
+  displayName: 'Install Backend Dependencies'
+
+# Install Frontend Dependencies
+- script: |
+    cd FRONTEND/client
+    npm install
+  displayName: 'Install Frontend Dependencies'
+
+# Build React Frontend
+- script: |
+    cd FRONTEND/client
+    npm run build
+  displayName: 'Build React Frontend'
+
+# Publish Build Artifacts
+- task: PublishBuildArtifacts@1
+  inputs:
+    PathtoPublish: '$(Build.SourcesDirectory)'
+    ArtifactName: 'NoteVault'
+  displayName: 'Publish Build Artifacts'
